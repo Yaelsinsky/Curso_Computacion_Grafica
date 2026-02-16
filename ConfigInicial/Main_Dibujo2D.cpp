@@ -1,6 +1,6 @@
-// Previo 2. Dibujo de primitivas en 2D
+// Práctica 2. Dibujo de primitivas en 2D
 // Camarena Arevalo Yael Eduardo 
-// Fecha de entrega: 10 de febrero de 2026
+// Fecha de entrega: 15 de febrero de 2026
 // 318279864
 
 #include<iostream>
@@ -28,7 +28,7 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);*/
 
-	GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "Dibujo de Primitivas en 2D", NULL, NULL);
+	GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "Dibujo de Primitivas en 2D - Yael Camarena", NULL, NULL);
 	glfwSetFramebufferSizeCallback(window, resize);
 	
 	//Verificaci�n de errores de creacion  ventana
@@ -64,15 +64,43 @@ int main() {
 
 	// Set up vertex data (and buffer(s)) and attribute pointers
 	float vertices[] = {
-		0.2f,  0.8f, 0.5f,    1.0f,0.0f,0.0f,  // top right
-		0.5f, -0.5f, 0.0f,    1.0f,1.0f,0.0f,  // bottom right
-		-0.5f, -0.5f, 0.0f,   1.0f,0.0f,1.0f,  // bottom left
-		-0.5f,  0.5f, 0.0f,   1.0f,1.0f,0.0f, // top left 
+    // --- MACETA (Tonos cafés) ---
+    -0.25f, -0.9f, 0.0f,   0.35f, 0.22f, 0.15f, // 0: Base Izq
+     0.25f, -0.9f, 0.0f,   0.35f, 0.22f, 0.15f, // 1: Base Der
+     0.35f, -0.4f, 0.0f,   0.45f, 0.30f, 0.20f, // 2: Tope Der
+    -0.35f, -0.4f, 0.0f,   0.45f, 0.30f, 0.20f, // 3: Tope Izq
+     0.0f,  -0.65f, 0.0f,  0.25f, 0.15f, 0.10f, // 4: Centro
+
+    // --- CUERPO CACTUS (Tonos verdes) ---
+    -0.15f, -0.4f, 0.0f,   0.29f, 0.44f, 0.23f, // 5: Base Tronco Izq
+     0.15f, -0.4f, 0.0f,   0.29f, 0.44f, 0.23f, // 6: Base Tronco Der
+     0.15f,  0.5f, 0.0f,   0.46f, 0.60f, 0.38f, // 7: Punta Tronco Der
+    -0.15f,  0.5f, 0.0f,   0.18f, 0.27f, 0.14f, // 8: Punta Tronco Izq
+     0.0f,   0.7f, 0.0f,   0.46f, 0.60f, 0.38f, // 9: Cúspide
+     0.0f,   0.1f, 0.0f,   0.25f, 0.40f, 0.20f, // 10: Centro Tronco
+
+    // --- BRAZO IZQUIERDO ---
+    -0.15f,  0.0f, 0.0f,   0.29f, 0.44f, 0.23f, // 11: Unión
+    -0.45f, -0.1f, 0.0f,   0.18f, 0.27f, 0.14f, // 12: Codo exterior
+    -0.45f,  0.3f, 0.0f,   0.46f, 0.60f, 0.38f, // 13: Punta superior
+    -0.30f,  0.3f, 0.0f,   0.29f, 0.44f, 0.23f, // 14: Punta interior
+
+    // --- BRAZO DERECHO ---
+     0.15f,  0.2f, 0.0f,   0.29f, 0.44f, 0.23f, // 15: Unión
+     0.45f,  0.1f, 0.0f,   0.18f, 0.27f, 0.14f, // 16: Codo exterior
+     0.45f,  0.5f, 0.0f,   0.46f, 0.60f, 0.38f, // 17: Punta superior
+     0.30f,  0.5f, 0.0f,   0.29f, 0.44f, 0.23f, // 18: Punta interior
+
 	};
 	unsigned int indices[] = {  // note that we start from 0!
-		3,2,1,// second Triangle
-		0,1,3,
-		
+		// Maceta
+		0, 1, 4,   1, 2, 4,   2, 3, 4,   3, 0, 4,
+		// Tronco
+		5, 6, 10,  6, 7, 10,  7, 9, 10,  9, 8, 10,  8, 5, 10,
+		// Brazo Izquierdo
+		11, 12, 14, 12, 13, 14,
+		// Brazo Derecho
+		15, 16, 18, 16, 17, 18
 	};
 
 
@@ -126,16 +154,15 @@ int main() {
 
 
        glPointSize(20);
-        glDrawArrays(GL_POINTS,0,4);
+        //glDrawArrays(GL_POINTS,0,4);
         
         //glDrawArrays(GL_LINES,0,2);
-        glDrawArrays(GL_LINE_LOOP,0,4);
+        //glDrawArrays(GL_LINE_LOOP,0,4);
         
         //glDrawArrays(GL_TRIANGLES,1,4);
-        //glDrawElements(GL_TRIANGLES, 3,GL_UNSIGNED_INT,0);
+		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
+        
 
-        
-        
         glBindVertexArray(0);
     
 		// Swap the screen buffers
