@@ -1,6 +1,6 @@
-// Previo 3. Proyecciones, transformaciones y Shaders
+// Práctica 3. Proyecciones, transformaciones y Shaders
 // Camarena Arevalo Yael Eduardo 
-// Fecha de entrega: 17 de febrero de 2026
+// Fecha de entrega: 22 de febrero de 2026
 // 318279864
 
 #include<iostream>
@@ -205,7 +205,7 @@ int main() {
 	
 	glm::mat4 projection=glm::mat4(1);
 
-	projection = glm::perspective(glm::radians(45.0f), (GLfloat)screenWidth / (GLfloat)screenHeight, 0.1f, 100.0f);//FOV, Radio de aspecto,znear,zfar
+	projection = glm::perspective(glm::radians(90.0f), (GLfloat)screenWidth / (GLfloat)screenHeight, 0.1f, 100.0f);//FOV, Radio de aspecto,znear,zfar
 	//projection = glm::ortho(0.0f, (GLfloat)screenWidth, 0.0f, (GLfloat)screenHeight, 0.1f, 1000.0f);//Izq,Der,Fondo,Alto,Cercania,Lejania
 	while (!glfwWindowShouldClose(window))
 	{
@@ -221,11 +221,12 @@ int main() {
 		// Draw our first triangle
 		ourShader.Use();
 		glm::mat4 model=glm::mat4(1);
-		glm::mat4 view=glm::mat4(1);
+		glm::mat4 view = glm::mat4(1.0f);
 	
-	   view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.2f));
-		model = glm::rotate(model, glm::radians(35.0f), glm::vec3(1.0f, 1.0f, 0.0f));  // use to compare orthographic and perspective projection
-		model = glm::scale(model, glm::vec3(0.7f, 1.3f, 0.7f));
+		view = glm::translate(view, glm::vec3(-0.4f, -0.8f, -2.8f));
+		view = glm::rotate(view, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(35.0f), glm::vec3(0.0f, 0.0f, 0.0f));  // use to compare orthographic and perspective projection
+		model = glm::scale(model, glm::vec3(0.0f, 0.0f, 0.0f));
 
 		//view = glm::translate(view, glm::vec3(screenWidth / 1.8f, screenHeight / 2.2f, -650.0f)); // use with orthographic projection
 		
@@ -241,30 +242,37 @@ int main() {
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
+
+		// --- CUBO 1  ---
+		model = glm::mat4(1.0f); 
+		model = glm::translate(model, glm::vec3(0.0f, -1.0f, -3.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
 		// --- CUBO 2  ---
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(1.8f, 0.0f, 0.0f)); 
-		model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 1.0f));
-		model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f)); 
+		model = glm::translate(model, glm::vec3(0.5f, 1.0f, 0.5f));
+		model = glm::rotate(model, glm::radians(20.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.8f, 0.8f, 0.8f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// --- CUBO 3  ---
-		model = glm::mat4(1.0f); 
-		model = glm::translate(model, glm::vec3(-1.8f, 0.5f, -1.0f)); 
-		model = glm::rotate(model, glm::radians(25.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+		model = glm::translate(model, glm::vec3(0.5f, 1.0f, 0.5f));
+		model = glm::rotate(model, glm::radians(20.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.8f, 0.8f, 0.8f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		// --- CUBO 4  ---
+		model = glm::translate(model, glm::vec3(0.5f, 1.0f, 0.5f));
+		model = glm::rotate(model, glm::radians(20.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.8f, 0.8f, 0.8f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
 		glBindVertexArray(0);
-
-
-
-		
-		
-		
 
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
