@@ -1,9 +1,10 @@
-// Previo 4. Modelado geométrico
+// Práctica 4. Modelado geométrico
 // Camarena Arevalo Yael Eduardo 
-// Fecha de entrega: 24 de febrero de 2026
+// Fecha de entrega: 1 de marzo de 2026
 // 318279864
 
 #include<iostream>
+#include <vector>
 
 //#define GLEW_STATIC
 
@@ -28,6 +29,36 @@ float movX=0.0f;
 float movY=0.0f;
 float movZ=-5.0f;
 float rot = 0.0f;
+// Función para generar un cubo con un color RGB específico para todos sus vértices
+std::vector<float> generateCube(float r, float g, float b) {
+	return {
+		// Front
+		-0.5f, -0.5f,  0.5f, r, g, b,  0.5f, -0.5f,  0.5f, r, g, b,  0.5f,  0.5f,  0.5f, r, g, b,
+		 0.5f,  0.5f,  0.5f, r, g, b, -0.5f,  0.5f,  0.5f, r, g, b, -0.5f, -0.5f,  0.5f, r, g, b,
+		 // Back
+		 -0.5f, -0.5f, -0.5f, r, g, b,  0.5f, -0.5f, -0.5f, r, g, b,  0.5f,  0.5f, -0.5f, r, g, b,
+		  0.5f,  0.5f, -0.5f, r, g, b, -0.5f,  0.5f, -0.5f, r, g, b, -0.5f, -0.5f, -0.5f, r, g, b,
+		  // Right
+		   0.5f, -0.5f,  0.5f, r, g, b,  0.5f, -0.5f, -0.5f, r, g, b,  0.5f,  0.5f, -0.5f, r, g, b,
+		   0.5f,  0.5f, -0.5f, r, g, b,  0.5f,  0.5f,  0.5f, r, g, b,  0.5f, -0.5f,  0.5f, r, g, b,
+		   // Left
+		   -0.5f,  0.5f,  0.5f, r, g, b, -0.5f,  0.5f, -0.5f, r, g, b, -0.5f, -0.5f, -0.5f, r, g, b,
+		   -0.5f, -0.5f, -0.5f, r, g, b, -0.5f, -0.5f,  0.5f, r, g, b, -0.5f,  0.5f,  0.5f, r, g, b,
+		   // Bottom
+		   -0.5f, -0.5f, -0.5f, r, g, b,  0.5f, -0.5f, -0.5f, r, g, b,  0.5f, -0.5f,  0.5f, r, g, b,
+			0.5f, -0.5f,  0.5f, r, g, b, -0.5f, -0.5f,  0.5f, r, g, b, -0.5f, -0.5f, -0.5f, r, g, b,
+			// Top
+			-0.5f,  0.5f, -0.5f, r, g, b,  0.5f,  0.5f, -0.5f, r, g, b,  0.5f,  0.5f,  0.5f, r, g, b,
+			 0.5f,  0.5f,  0.5f, r, g, b, -0.5f,  0.5f,  0.5f, r, g, b, -0.5f,  0.5f, -0.5f, r, g, b
+	};
+}
+
+// Estructura para guardar la posición y el color de cada voxel
+struct CubeInfo {
+	float x, y, z;
+	int colorID; // 0=Amarillo, 1=Negro, 2=Azul, 3=Rojo
+};
+
 int main() {
 	glfwInit();
 	//Verificación de compatibilidad 
@@ -79,188 +110,170 @@ int main() {
 
 	// Build and compile our shader program
 	Shader ourShader("Shader/core.vs", "Shader/core.frag");
+	GLint colorLoc = glGetUniformLocation(ourShader.Program, "ourColor");
+    // Construcción geométrica de la abeja CUBO POR CUBO
+    std::vector<CubeInfo> beeCubes;
+    auto addCube = [&](float x, float y, float z, int c) {
+        beeCubes.push_back({ x, y, z, c });
+        };
 
+    // --- 1. CABEZA ---
+    // Cara Frontal Z = -3
+    for (int x = -2; x <= 2; x++) addCube(x, 8, -3, 0); // Amarillo superior
+    for (int x = -3; x <= 3; x++) addCube(x, 7, -3, 0); // Amarillo cejas
+    addCube(-3, 6, -3, 1); addCube(-2, 6, -3, 1);  // Ojo izquierdo sup
+    for (int x = -1; x <= 1; x++) addCube(x, 6, -3, 0); // Puente nariz amarillo
+    addCube(2, 6, -3, 1);  addCube(3, 6, -3, 1);   // Ojo derecho sup
+    addCube(-3, 5, -3, 1); addCube(-2, 5, -3, 1);  // Ojo izquierdo inf
+    for (int x = -1; x <= 1; x++) addCube(x, 5, -3, 0); // Hocico amarillo
+    addCube(2, 5, -3, 1);  addCube(3, 5, -3, 1);   // Ojo derecho inf
+    addCube(-3, 4, -3, 3); addCube(-2, 4, -3, 3);  // Ojo rojo izquierda
+    for (int x = -1; x <= 1; x++) addCube(x, 4, -3, 0); // Boca amarilla
+    addCube(2, 4, -3, 3);  addCube(3, 4, -3, 3);   // Ojo roj derecha
 
-	// Set up vertex data (and buffer(s)) and attribute pointers
+    // Relleno Cabeza Z = -2 y Z = -1
+    for (int z = -2; z <= -1; z++) {
+        for (int x = -2; x <= 2; x++) addCube(x, 8, z, 0);
+        for (int y = 4; y <= 7; y++) {
+            for (int x = -3; x <= 3; x++) addCube(x, y, z, 0);
+        }
+    }
 
-	
+    // --- 2. ANTENAS ---
+    // Izquierda
+    addCube(-2, 9, -2, 1); addCube(-2, 10, -2, 1); addCube(-3, 10, -2, 1);
+    // Derecha
+    addCube(2, 9, -2, 1);  addCube(2, 10, -2, 1);  addCube(3, 10, -2, 1);
 
-	// use with Perspective Projection
-	float vertices[] = {
-		-0.5f, -0.5f, 0.5f, 1.0f, 0.0f,0.0f,//Front
-		0.5f, -0.5f, 0.5f,  1.0f, 0.0f,0.0f,
-		0.5f,  0.5f, 0.5f,  1.0f, 0.0f,0.0f,
-		0.5f,  0.5f, 0.5f,  1.0f, 0.0f,0.0f,
-		-0.5f,  0.5f, 0.5f, 1.0f, 0.0f,0.0f,
-		-0.5f, -0.5f, 0.5f, 1.0f, 0.0f,0.0f,
-		
-	    -0.5f, -0.5f,-0.5f, 0.0f, 1.0f,0.0f,//Back
-		 0.5f, -0.5f,-0.5f, 0.0f, 1.0f,0.0f,
-		 0.5f,  0.5f,-0.5f, 0.0f, 1.0f,0.0f,
-		 0.5f,  0.5f,-0.5f, 0.0f, 1.0f,0.0f,
-	    -0.5f,  0.5f,-0.5f, 0.0f, 1.0f,0.0f,
-	    -0.5f, -0.5f,-0.5f, 0.0f, 1.0f,0.0f,
-		
-		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 0.0f,1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f, 0.0f,1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f, 0.0f,1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f, 0.0f,1.0f,
-		 0.5f,  -0.5f, 0.5f, 0.0f, 0.0f,1.0f,
-      
-		-0.5f,  0.5f,  0.5f,  1.0f, 1.0f,0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,0.0f,
-		-0.5f, -0.5f, -0.5f,  1.0f, 1.0f,0.0f,
-		-0.5f, -0.5f, -0.5f,  1.0f, 1.0f,0.0f,
-		-0.5f, -0.5f,  0.5f,  1.0f, 1.0f,0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 1.0f,0.0f,
-		
-		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,1.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, 1.0f,1.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, 1.0f,1.0f,
-		-0.5f, -0.5f,  0.5f, 0.0f, 1.0f,1.0f,
-		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,1.0f,
-		
-		-0.5f,  0.5f, -0.5f, 1.0f, 0.2f,0.5f,
-		0.5f,  0.5f, -0.5f,  1.0f, 0.2f,0.5f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.2f,0.5f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.2f,0.5f,
-		-0.5f,  0.5f,  0.5f, 1.0f, 0.2f,0.5f,
-		-0.5f,  0.5f, -0.5f, 1.0f, 0.2f,0.5f,
-	};
+    // --- 3. CUERPO (Tórax y Abdomen) ---
+    for (int z = 0; z <= 7; z++) {
+        // Franjas de colores: Z=(2,3 y 6,7) son negras, el resto amarillo
+        int color = (z == 2 || z == 3 || z == 6 || z == 7) ? 1 : 0;
+        for (int y = 3; y <= 8; y++) {
+            for (int x = -3; x <= 3; x++) {
+                addCube(x, y, z, color);
+            }
+        }
+    }
 
+    // --- 4. COLA Y AGUIJÓN ---
+    for (int x = -2; x <= 2; x++) {
+        for (int y = 4; y <= 8; y++) {
+            addCube(x, y, 8, 0); // Cola amarilla
+        }
+    }
+    addCube(0, 5, 9, 1); // Aguijón negro
 
+    // --- 5. PATAS ---
+    // Delanteras
+    addCube(-2, 2, 0, 1); addCube(-2, 1, 0, 1); addCube(-3, 0, -1, 1);
+    addCube(2, 2, 0, 1);  addCube(2, 1, 0, 1);  addCube(3, 0, -1, 1);
+    // Medias
+    addCube(-3, 2, 4, 1); addCube(-3, 1, 4, 1); addCube(-4, 0, 4, 1);
+    addCube(3, 2, 4, 1);  addCube(3, 1, 4, 1);  addCube(4, 0, 4, 1);
+    // Traseras
+    addCube(-2, 2, 7, 1); addCube(-2, 1, 7, 1); addCube(-2, 0, 8, 1);
+    addCube(2, 2, 7, 1);  addCube(2, 1, 7, 1);  addCube(2, 0, 8, 1);
 
+    // --- 6. ALAS ---
+    // Izquierda
+    addCube(-2, 9, 3, 2);  addCube(-3, 9, 3, 2);
+    addCube(-2, 9, 4, 2);  addCube(-3, 9, 4, 2);
+    addCube(-3, 10, 3, 2); addCube(-4, 10, 3, 2);
+    addCube(-3, 10, 4, 2); addCube(-4, 10, 4, 2);
+    addCube(-3, 10, 5, 2); addCube(-4, 10, 5, 2);
+    addCube(-4, 11, 2, 2); addCube(-5, 11, 2, 2);
+    addCube(-4, 11, 3, 2); addCube(-5, 11, 3, 2);
+    addCube(-4, 12, 2, 2); addCube(-5, 12, 2, 2);
+    // Derecha
+    addCube(2, 9, 3, 2);  addCube(3, 9, 3, 2);
+    addCube(2, 9, 4, 2);  addCube(3, 9, 4, 2);
+    addCube(3, 10, 3, 2); addCube(4, 10, 3, 2);
+    addCube(3, 10, 4, 2); addCube(4, 10, 4, 2);
+    addCube(3, 10, 5, 2); addCube(4, 10, 5, 2);
+    addCube(4, 11, 2, 2); addCube(5, 11, 2, 2);
+    addCube(4, 11, 3, 2); addCube(5, 11, 3, 2);
+    addCube(4, 12, 2, 2); addCube(5, 12, 2, 2);
 
-	GLuint VBO, VAO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	//glGenBuffers(1, &EBO);
+    // --- SETUP DE BUFFERS POR COLOR ---
+    // (0: Amarillo, 1: Negro, 2: Azul, 3: Rojo)
+    GLuint VAO[4], VBO[4];
+    glGenVertexArrays(4, VAO);
+    glGenBuffers(4, VBO);
 
-	// Enlazar  Vertex Array Object
-	glBindVertexArray(VAO);
+    std::vector<float> colY = generateCube(1.0f, 0.7f, 0.0f); // Amarillo mostaza
+    std::vector<float> colB = generateCube(0.15f, 0.15f, 0.15f); // Negro
+    std::vector<float> colU = generateCube(0.1f, 0.6f, 1.0f); // Azul cielo
+    std::vector<float> colR = generateCube(0.9f, 0.2f, 0.3f); // Rojo 
 
-	//2.- Copiamos nuestros arreglo de vertices en un buffer de vertices para que OpenGL lo use
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	// 3.Copiamos nuestro arreglo de indices en  un elemento del buffer para que OpenGL lo use
-	/*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);*/
+    std::vector<float>* colors[4] = { &colY, &colB, &colU, &colR };
 
-	// 4. Despues colocamos las caracteristicas de los vertices
+    for (int i = 0; i < 4; i++) {
+        glBindVertexArray(VAO[i]);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO[i]);
+        glBufferData(GL_ARRAY_BUFFER, colors[i]->size() * sizeof(float), colors[i]->data(), GL_STATIC_DRAW);
 
-	//Posicion
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)0);
-	glEnableVertexAttribArray(0);
+        // Posicion
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+        glEnableVertexAttribArray(0);
+        // Color
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+        glEnableVertexAttribArray(1);
+    }
 
-	//Color
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (GLfloat)screenWidth / (GLfloat)screenHeight, 0.1f, 100.0f);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+    while (!glfwWindowShouldClose(window)) {
+        Inputs(window);
+        glfwPollEvents();
 
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // Fondo blanco
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glBindVertexArray(0); // Unbind VAO (it's always a good thing to unbind any buffer/array to prevent strange bugs)
+        ourShader.Use();
+        glm::mat4 view = glm::mat4(1.0f);
+        view = glm::translate(view, glm::vec3(movX, movY, movZ));
+        view = glm::rotate(view, glm::radians(rot), glm::vec3(0.0f, 1.0f, 0.0f));
 
-	
-	glm::mat4 projection=glm::mat4(1);
+        GLint modelLoc = glGetUniformLocation(ourShader.Program, "model");
+        GLint viewLoc = glGetUniformLocation(ourShader.Program, "view");
+        GLint projecLoc = glGetUniformLocation(ourShader.Program, "projection");
 
-	projection = glm::perspective(glm::radians(45.0f), (GLfloat)screenWidth / (GLfloat)screenHeight, 0.1f, 100.0f);//FOV, Radio de aspecto,znear,zfar
-	//projection = glm::ortho(0.0f, (GLfloat)screenWidth, 0.0f, (GLfloat)screenHeight, 0.1f, 1000.0f);//Izq,Der,Fondo,Alto,Cercania,Lejania
-	while (!glfwWindowShouldClose(window))
-	{
-		
-		Inputs(window);
-		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
-		glfwPollEvents();
+        glUniformMatrix4fv(projecLoc, 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
-		// Render
-		// Clear the colorbuffer
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
+        int currentVAO = -1;
 
+        // LA ABEJA RECORRIENDO EL ARREGLO
+        for (const auto& cube : beeCubes) {
+            if (currentVAO != cube.colorID) {
+                glBindVertexArray(VAO[cube.colorID]);
+                currentVAO = cube.colorID;
+            }
 
-		// Draw our first triangle
-		ourShader.Use();
-		glm::mat4 model=glm::mat4(1);
-		glm::mat4 view=glm::mat4(1);
-	
+            glm::mat4 model = glm::mat4(1.0f);
 
-		view = glm::translate(view, glm::vec3(movX,movY, movZ));
-		view = glm::rotate(view, glm::radians(rot), glm::vec3(0.0f, 1.0f, 0.0f));
+            // Primero la escala base para que los cubos se ajusten a la pantalla
+            model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 
-		GLint modelLoc = glGetUniformLocation(ourShader.Program, "model");
-		GLint viewLoc = glGetUniformLocation(ourShader.Program, "view");
-		GLint projecLoc = glGetUniformLocation(ourShader.Program, "projection");
+            // Trasladamos basándonos en nuestras coordenadas matriciales.
+            // Restamos -5 en Y y -3 en Z para que el centro de la abeja quede en el origen exacto de rotación
+            model = glm::translate(model, glm::vec3(cube.x, cube.y - 5.0f, cube.z - 3.0f));
 
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
-		glUniformMatrix4fv(projecLoc, 1, GL_FALSE, glm::value_ptr(projection));
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-	
-
-		glBindVertexArray(VAO);
-	
-	    model = glm::mat4(1.0f);
-		model = glm::scale(model, glm::vec3(3.0f, 0.1f, 2.0f)); // Ancho, grosor, profundidad
-		model = glm::translate(model, glm::vec3(0.0f, 0.6f, 0.0f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
-		// Pata 1
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(1.45f, -0.3f, 0.95f));
-		model = glm::scale(model, glm::vec3(0.1f, 0.6f, 0.1f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		// Pata 2
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(-1.45f, -0.3f, 0.95f));
-		model = glm::scale(model, glm::vec3(0.1f, 0.6f, 0.1f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		// Pata 3
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(-1.45f, -0.3f, -0.95f));
-		model = glm::scale(model, glm::vec3(0.1f, 0.6f, 0.1f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		// Pata 4
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(1.45f, -0.3f, -0.95f));
-		model = glm::scale(model, glm::vec3(0.1f, 0.6f, 0.1f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		// Pata 5
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, -0.3f, 0.95f));
-		model = glm::scale(model, glm::vec3(0.1f, 0.6f, 0.1f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		// Pata 6
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, -0.3f, -0.95f));
-		model = glm::scale(model, glm::vec3(0.1f, 0.6f, 0.1f));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glBindVertexArray(0);
-
 				
 
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
 	
 	}
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(4, VAO);
+	glDeleteBuffers(4, VBO);
 
 
 	glfwTerminate();
