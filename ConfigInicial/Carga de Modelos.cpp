@@ -1,6 +1,6 @@
-// Previo 6. Carga de modelos
+// Practica 6. Carga de modelos
 // Camarena Arevalo Yael Eduardo 
-// Fecha de entrega: 10 de marzo de 2026
+// Fecha de entrega: 15 de marzo de 2026
 // 318279864
 
 // Std. Includes
@@ -99,10 +99,17 @@ int main( )
     Shader shader( "Shader/modelLoading.vs", "Shader/modelLoading.frag" );
     
     // Load models
-    Model plant((char*)"Models/eb_house_plant_01.obj");
-    glm::mat4 projection = glm::perspective( camera.GetZoom( ), ( float )SCREEN_WIDTH/( float )SCREEN_HEIGHT, 0.1f, 100.0f );
-    
-  
+// --- CARGA DE MODELOS ---
+    Model perrito((char*)"Models/RedDog.obj");
+    Model piano((char*)"Models/Piano/Piano.obj");
+    Model cuarto((char*)"Models/Cuarto/model.obj");
+    Model banco((char*)"Models/Silla/uploads_files_5442650_plastic+chair.obj");
+    Model mesa((char*)"Models/Mesa/uploads_files_3414486_20608_Kids3PieceDippedTableWhite.obj");
+    Model tapete((char*)"Models/Tapete/uploads_files_3416341_55424_RussellWovenAreaRug.obj");
+    Model micro((char*)"Models/Microfono/Shure_55.obj");
+
+    // --- DEFINICIÓN DE PROYECCIÓN ---
+    glm::mat4 projection = glm::perspective(camera.GetZoom(), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 
     // Game loop
     while (!glfwWindowShouldClose(window))
@@ -127,9 +134,40 @@ int main( )
         glUniformMatrix4fv(glGetUniformLocation(shader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 
         // Draw the loaded model
-        glm::mat4 model(1);
+        // --- DIBUJAR PERRITO ---
+        glm::mat4 model(1.0f); //
         glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        plant.Draw(shader);
+        perrito.Draw(shader);
+
+        // --- DIBUJAR MICRO ---
+        model = glm::mat4(1.0f); 
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        micro.Draw(shader);
+
+        // --- DIBUJAR CUARTO ---
+        model = glm::mat4(1.0f);
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        cuarto.Draw(shader);
+
+        // --- DIBUJAR PIANO ---
+        model = glm::mat4(1.0f);
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        piano.Draw(shader);
+
+        // --- DIBUJAR SILLA ---
+        model = glm::mat4(1.0f);
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        banco.Draw(shader);
+
+        // --- DIBUJAR MESA ---
+        model = glm::mat4(1.0f);
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        mesa.Draw(shader);
+
+        // --- DIBUJAR TAPETE ---
+        model = glm::mat4(1.0f);
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        tapete.Draw(shader);
 
         //model = glm::translate(model, glm::vec3(3.0f, 0.0f, 0.0f));
         //model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));

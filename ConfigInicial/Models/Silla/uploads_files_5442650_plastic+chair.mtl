@@ -1,0 +1,20 @@
+# Material para silla de plástico - Optimizado para visibilidad
+newmtl Material.001
+    # Ns (Shininess): Reducido un poco para que el brillo no sea un punto blanco ciego
+    Ns 50.0000
+    
+    # Ka (Ambient): Lo bajamos para que no se vea plano, pero lo mantenemos presente
+    Ka 0.3000 0.3000 0.3000
+    
+    # Kd (Diffuse): Subido a 1.0 para que la textura se vea al 100% de su brillo
+    Kd 1.0000 1.0000 1.0000
+    
+    # Ks (Specular): Reflejo de luz
+    Ks 0.2000 0.2000 0.2000
+    
+    # Opacidad total
+    d 1.0
+    illum 2
+    
+    # RUTA RELATIVA: Asegúrate de que el archivo se llame exactamente así
+    map_Kd Blanco_BaseColor.jpg
