@@ -1,6 +1,6 @@
-// Previo 7. Texturizado
+// Práctica 7. Texturizado
 // Camarena Arevalo Yael Eduardo 
-// Fecha de entrega: 17 de marzo de 2026
+// Fecha de entrega: 22 de marzo de 2026
 // 318279864
 #include <iostream>
 #include <cmath>
@@ -25,8 +25,8 @@
 
 
 // Function prototypes
-void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode);
-void MouseCallback(GLFWwindow *window, double xPos, double yPos);
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
+void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 void DoMovement();
 
 // Window dimensions
@@ -44,10 +44,10 @@ bool firstMouse = true;
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 // Deltatime
-GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
-GLfloat lastFrame = 0.0f;  	// Time of last frame
+GLfloat deltaTime = 0.0f; // Time between current frame and last frame
+GLfloat lastFrame = 0.0f;  // Time of last frame
 
-							// The MAIN function, from here we start the application and run the game loop
+// The MAIN function, from here we start the application and run the game loop
 int main()
 {
 	// Init GLFW
@@ -104,21 +104,57 @@ int main()
 	GLfloat vertices[] =
 	{
 		// Positions            // Colors              // Texture Coords (UV)
-		-0.5f, -0.5f, 0.0f,    1.0f, 1.0f, 1.0f,      0.0f, 0.0f, 
-		 0.5f, -0.5f, 0.0f,    1.0f, 1.0f, 1.0f,      1.0f, 0.0f, 
-		 0.5f,  0.5f, 0.0f,    1.0f, 1.0f, 1.0f,      1.0f, 1.0f, 
-		-0.5f,  0.5f, 0.0f,    1.0f, 1.0f, 1.0f,      0.0f, 1.0f  
-	};
+		// Front face (Cara 1 - Top Left)
+		-0.5f, -0.5f,  0.5f,    1.0f, 1.0f, 1.0f,      0.0f, 0.5f,
+		 0.5f, -0.5f,  0.5f,    1.0f, 1.0f, 1.0f,      0.333f, 0.5f,
+		 0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,      0.333f, 1.0f,
+		 0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,      0.333f, 1.0f,
+		-0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,      0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,    1.0f, 1.0f, 1.0f,      0.0f, 0.5f,
 
-	GLuint indices[] =
-	{  // Note that we start from 0!
-		0,1,3,
-		1,2,3
-	
+		// Back face (Cara 6 - Bottom Right)
+		-0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,      1.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,      0.666f, 0.0f,
+		 0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 1.0f,      0.666f, 0.5f,
+		 0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 1.0f,      0.666f, 0.5f,
+		-0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 1.0f,      1.0f, 0.5f,
+		-0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,      1.0f, 0.0f,
+
+		// Left face (Cara 2 - Top Center)
+		-0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,      0.666f, 1.0f,
+		-0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 1.0f,      0.333f, 1.0f,
+		-0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,      0.333f, 0.5f,
+		-0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,      0.333f, 0.5f,
+		-0.5f, -0.5f,  0.5f,    1.0f, 1.0f, 1.0f,      0.666f, 0.5f,
+		-0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,      0.666f, 1.0f,
+
+		// Right face (Cara 5 - Bottom Center)
+		 0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,      0.333f, 0.5f,
+		 0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 1.0f,      0.666f, 0.5f,
+		 0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,      0.666f, 0.0f,
+		 0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,      0.666f, 0.0f,
+		 0.5f, -0.5f,  0.5f,    1.0f, 1.0f, 1.0f,      0.333f, 0.0f,
+		 0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,      0.333f, 0.5f,
+
+		 // Bottom face (Cara 4 - Bottom Left)
+		 -0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,      0.0f, 0.5f,
+		  0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,      0.333f, 0.5f,
+		  0.5f, -0.5f,  0.5f,    1.0f, 1.0f, 1.0f,      0.333f, 0.0f,
+		  0.5f, -0.5f,  0.5f,    1.0f, 1.0f, 1.0f,      0.333f, 0.0f,
+		 -0.5f, -0.5f,  0.5f,    1.0f, 1.0f, 1.0f,      0.0f, 0.0f,
+		 -0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 1.0f,      0.0f, 0.5f,
+
+		 // Top face (Cara 3 - Top Right)
+		 -0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 1.0f,      0.666f, 1.0f,
+		  0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 1.0f,      1.0f, 1.0f,
+		  0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,      1.0f, 0.5f,
+		  0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,      1.0f, 0.5f,
+		 -0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,      0.666f, 0.5f,
+		 -0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 1.0f,      0.666f, 1.0f
 	};
 
 	// First, set the container's VAO (and VBO)
-	GLuint VBO, VAO,EBO;
+	GLuint VBO, VAO, EBO;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
@@ -127,36 +163,34 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	// glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// Position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
 	// Color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(1);
 	// Texture Coordinate attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid *)(6 * sizeof(GLfloat)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(2);
 	glBindVertexArray(0);
 
 	// Load textures
 	GLuint texture1;
 	glGenTextures(1, &texture1);
-	glBindTexture(GL_TEXTURE_2D,texture1);
-	int textureWidth, textureHeight,nrChannels;
+	glBindTexture(GL_TEXTURE_2D, texture1);
+	int textureWidth, textureHeight, nrChannels;
 	stbi_set_flip_vertically_on_load(true);
-	unsigned char *image;
+	unsigned char* image;
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 	// Diffuse map
-	image = stbi_load("images/cabezasteve.png", &textureWidth, &textureHeight, &nrChannels,0);
+	image = stbi_load("images/dado.jpg", &textureWidth, &textureHeight, &nrChannels, 0);
 	glBindTexture(GL_TEXTURE_2D, texture1);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	glGenerateMipmap(GL_TEXTURE_2D);
 	if (image)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
@@ -168,7 +202,6 @@ int main()
 	}
 	stbi_image_free(image);
 
-	
 
 	// Game loop
 	while (!glfwWindowShouldClose(window))
@@ -191,7 +224,7 @@ int main()
 		glm::mat4 view;
 		view = camera.GetViewMatrix();
 		glm::mat4 projection = glm::perspective(camera.GetZoom(), (GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.1f, 100.0f);
-		glm::mat4 model(1);
+
 		// Get location objects for the matrices on the lamp shader (these could be different on a different shader)
 		// Get the uniform locations
 		GLint modelLoc = glGetUniformLocation(lampShader.Program, "model");
@@ -205,10 +238,17 @@ int main()
 		// Set matrices
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		// Draw the light object (using light's vertex attributes)
+
+		// Draw the objects
 		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		// --- CUBO 1 ---
+		glm::mat4 model(1);
+		model = glm::rotate(model, glm::radians(35.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
 		glBindVertexArray(0);
 
 		// Swap the screen buffers
@@ -250,7 +290,7 @@ void DoMovement()
 }
 
 // Is called whenever a key is pressed/released via GLFW
-void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode)
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action)
 	{
@@ -270,7 +310,7 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 	}
 }
 
-void MouseCallback(GLFWwindow *window, double xPos, double yPos)
+void MouseCallback(GLFWwindow* window, double xPos, double yPos)
 {
 	if (firstMouse)
 	{
