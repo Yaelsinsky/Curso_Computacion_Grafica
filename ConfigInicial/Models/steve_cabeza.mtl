@@ -1,0 +1,12 @@
+# Blender 5.0.1 MTL File: 'Material.001'
+
+newmtl Material.001
+	Ns 17.9368
+	Ka 1.0000 1.0000 1.0000
+	Kd 1.0000 1.0000 1.0000
+	Ks 0.5000 0.5000 0.5000
+	Ke 0.0000 0.0000 0.0000
+	Ni 1.5000
+	d 0.6696
+	illum 2
+	map_Kd 54f4b55a59ff9ddf2a2655c7f35e4356.png
