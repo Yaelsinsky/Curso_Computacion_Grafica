@@ -1,7 +1,6 @@
 #version 330 core
 
-#define NUMBER_OF_POINT_LIGHTS 4
-#define NUMBER_OF_SPOT_LIGHTS 3
+#define NUMBER_OF_POINT_LIGHTS 1
 
 struct Material
 {
@@ -57,10 +56,9 @@ out vec4 color;
 uniform vec3 viewPos;
 uniform DirLight dirLight;
 uniform PointLight pointLights[NUMBER_OF_POINT_LIGHTS];
-uniform SpotLight spotLights[NUMBER_OF_SPOT_LIGHTS];
+uniform SpotLight spotLight;
 uniform Material material;
 uniform int transparency;
-uniform int esLuz; // Nueva bandera para modelos emisivos
 
 // Function prototypes
 vec3 CalcDirLight( DirLight light, vec3 normal, vec3 viewDir );
@@ -72,34 +70,21 @@ void main( )
     // Properties
     vec3 norm = normalize( Normal );
     vec3 viewDir = normalize( viewPos - FragPos );
-    vec4 texColor = texture(material.diffuse, TexCoords);
     
-    if (esLuz == 1)
+    // Directional lighting
+    vec3 result = CalcDirLight( dirLight, norm, viewDir );
+    
+    // Point lights
+    for ( int i = 0; i < NUMBER_OF_POINT_LIGHTS; i++ )
     {
-        // Si es fuente de luz, usamos solo el color de la textura (unlit)
-        color = texColor;
-    }
-    else
-    {
-        // Directional lighting
-        vec3 result = CalcDirLight( dirLight, norm, viewDir );
-        
-        // Point lights
-        for ( int i = 0; i < NUMBER_OF_POINT_LIGHTS; i++ )
-        {
-            result += CalcPointLight( pointLights[i], norm, FragPos, viewDir );
-        }
-        
-        // Spot lights
-        for ( int i = 0; i < NUMBER_OF_SPOT_LIGHTS; i++ )
-        {
-            result += CalcSpotLight( spotLights[i], norm, FragPos, viewDir );
-        }
-        
-        color = vec4( result, texColor.a );
+        result += CalcPointLight( pointLights[i], norm, FragPos, viewDir );
     }
     
-    if(color.a < 0.1 && transparency == 1)
+    // Spot light
+    result += CalcSpotLight( spotLight, norm, FragPos, viewDir );
+ 	
+    color = vec4( result,texture(material.diffuse, TexCoords).rgb );
+	  if(color.a < 0.1 && transparency==1)
         discard;
 
 }
