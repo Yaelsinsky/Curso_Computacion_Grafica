@@ -1,6 +1,6 @@
-// Previo 10. Animación básica
+// Práctica 10. Animación básica
 // Camarena Arevalo Yael Eduardo 
-// Fecha de entrega: 14 de abril de 2026
+// Fecha de entrega: 19 de abril de 2026
 // 318279864
 #include <iostream>
 #include <cmath>
@@ -107,6 +107,19 @@ glm::vec3 Light1 = glm::vec3(0);
 float rotBall = 0;
 bool AnimBall = false;
 bool subiendo = false; 
+
+// Variables para trayectorias
+float dogAngle = 0.0f;
+float ballAngle = 0.0f;
+float radius = 2.2f;  
+float speed = 1.5f;         
+float interactionSpeed = 4.0f; 
+
+// Variables para el brinco e interacción
+float dogJumpY = 0.0f;
+float ballHoverY = 1.0f; 
+bool isInteracting = false;
+float interactionTimer = 0.0f;
 
 // Deltatime
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
@@ -289,9 +302,13 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Piso.Draw(lightingShader);
 
+		// --- RENDERIZADO DEL PERRO ---
 		model = glm::mat4(1);
+		float dogX = radius * cos(dogAngle);
+		float dogZ = radius * sin(dogAngle);
+		model = glm::translate(model, glm::vec3(dogX, dogJumpY, dogZ));
+		model = glm::rotate(model, -dogAngle, glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 		Dog.Draw(lightingShader);
 
 		model = glm::mat4(1);
@@ -300,9 +317,12 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1);
 		// model = glm::rotate(model, glm::radians(rotBall), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::translate(model, glm::vec3(0.0f, rotBall, 0.0f));
+		model = glm::mat4(1);
+		float ballX = radius * cos(ballAngle);
+		float ballZ = radius * sin(ballAngle);
+		model = glm::translate(model, glm::vec3(ballX, ballHoverY, ballZ));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-	    Ball.Draw(lightingShader); 
+		Ball.Draw(lightingShader);
 		glDisable(GL_BLEND);  //Desactiva el canal alfa 
 		glBindVertexArray(0);
 	
@@ -448,17 +468,42 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 	}
 }
 void Animation() {
-	if (AnimBall)
-	{
-		float velocidad = 1.0f * deltaTime;
-		if (subiendo) {
-			rotBall += velocidad;
-			if (rotBall >= 0.0f) subiendo = false; // Límite superior: Nariz
+	if (AnimBall) {
+		dogAngle += speed * deltaTime;
+		ballAngle -= speed * deltaTime;
+
+		// 1. Calculamos posiciones actuales en el plano (X, Z)
+		glm::vec3 posPerro(radius * cos(dogAngle), 0.0f, radius * sin(dogAngle));
+		glm::vec3 posBall(radius * cos(ballAngle - 0.2), 0.0f, radius * sin(ballAngle - 0.2));
+
+		// 2. Calculamos el "Frente" del perro para detectar la cabeza
+		// La tangente de un círculo (x=cos, z=sin) es (-sin, cos)
+		glm::vec3 frentePerro(-sin(dogAngle), 0.0f, cos(dogAngle));
+		glm::vec3 cabezaPerro = posPerro + (frentePerro * 0.4f); 
+
+		// 3. Distancia real entre la cabeza y la pelota 
+		float distancia = glm::distance(cabezaPerro, posBall);
+
+		// 4. Disparador: Si están a menos de 0.6 unidades, interactúan
+		if (distancia < 0.6f) {
+			isInteracting = true;
 		}
 		else {
-			rotBall -= velocidad;
-			if (rotBall <= -0.5f) subiendo = true; // Límite inferior: Suelo
+			isInteracting = false;
 		}
+
+		// 5. Interpolación suave del movimiento Y
+		if (isInteracting) {
+			interactionTimer += deltaTime * interactionSpeed;
+			if (interactionTimer > 3.1415f) interactionTimer = 3.1415f;
+		}
+		else {
+			interactionTimer -= deltaTime * interactionSpeed;
+			if (interactionTimer < 0.0f) interactionTimer = 0.0f;
+		}
+
+		dogJumpY = sin(interactionTimer) * 0.8f;
+		ballHoverY = 0.9f - (sin(interactionTimer) * 0.5f);
 	}
 }
 void MouseCallback(GLFWwindow *window, double xPos, double yPos)
