@@ -1,9 +1,10 @@
-// Previo 12. Animacion por KeyFrames
+// Práctica 12. Animacion por KeyFrames
 // Camarena Arevalo Yael Eduardo 
-// Fecha de entrega: 28 de abril de 2026
+// Fecha de entrega: 3 de mayo de 2026
 // 318279864
 #include <iostream>
 #include <cmath>
+#include <fstream>
 
 // GLEW
 #include <GL/glew.h>
@@ -107,6 +108,7 @@ glm::vec3 Light1 = glm::vec3(0);
 float rotBall = 0.0f;
 float rotDog = 0.0f;
 float tiltDog = 0.0f;
+float rollDog = 0.0f;
 int dogAnim = 0;
 float FLLeg = 0.0f;
 float FRLeg = 0.0f;
@@ -120,7 +122,7 @@ float tail = 0.0f;
 //KeyFrames
 float dogPosX, dogPosY, dogPosZ;
 
-#define MAX_FRAMES 9
+#define MAX_FRAMES 100
 int i_max_steps = 190;
 int i_curr_steps = 0;
 typedef struct _frame {
@@ -129,6 +131,8 @@ typedef struct _frame {
 	float rotDogInc;
 	float tiltDog;
 	float tiltDogInc;
+	float rollDog;       
+	float rollDogInc;   
 	float dogPosX;
 	float dogPosY;
 	float dogPosZ;
@@ -168,6 +172,7 @@ void saveFrame(void)
 
 	KeyFrame[FrameIndex].rotDog = rotDog;
 	KeyFrame[FrameIndex].tiltDog = tiltDog;
+	KeyFrame[FrameIndex].rollDog = rollDog; 
 	KeyFrame[FrameIndex].head = head;
 	KeyFrame[FrameIndex].tail = tail;
 	KeyFrame[FrameIndex].FLLeg = FLLeg;
@@ -186,6 +191,7 @@ void resetElements(void)
 
 	rotDog = KeyFrame[0].rotDog;
 	tiltDog = KeyFrame[0].tiltDog;
+	rollDog = KeyFrame[0].rollDog; 
 	head = KeyFrame[0].head;
 	tail = KeyFrame[0].tail;
 	FLLeg = KeyFrame[0].FLLeg;
@@ -202,12 +208,72 @@ void interpolation(void)
 
 	KeyFrame[playIndex].rotDogInc = (KeyFrame[playIndex + 1].rotDog - KeyFrame[playIndex].rotDog) / i_max_steps;
 	KeyFrame[playIndex].tiltDogInc = (KeyFrame[playIndex + 1].tiltDog - KeyFrame[playIndex].tiltDog) / i_max_steps;
+	KeyFrame[playIndex].rollDogInc = (KeyFrame[playIndex + 1].rollDog - KeyFrame[playIndex].rollDog) / i_max_steps;
 	KeyFrame[playIndex].headInc = (KeyFrame[playIndex + 1].head - KeyFrame[playIndex].head) / i_max_steps;
 	KeyFrame[playIndex].tailInc = (KeyFrame[playIndex + 1].tail - KeyFrame[playIndex].tail) / i_max_steps;
 	KeyFrame[playIndex].FLLegInc = (KeyFrame[playIndex + 1].FLLeg - KeyFrame[playIndex].FLLeg) / i_max_steps;
 	KeyFrame[playIndex].FRLegInc = (KeyFrame[playIndex + 1].FRLeg - KeyFrame[playIndex].FRLeg) / i_max_steps;
 	KeyFrame[playIndex].BLLegInc = (KeyFrame[playIndex + 1].BLLeg - KeyFrame[playIndex].BLLeg) / i_max_steps;
 	KeyFrame[playIndex].BRLegInc = (KeyFrame[playIndex + 1].BRLeg - KeyFrame[playIndex].BRLeg) / i_max_steps;
+}
+
+void saveAnimationToFile(const char* filename)
+{
+	std::ofstream file(filename);
+	if (!file.is_open())
+	{
+		printf("Error: no se pudo abrir el archivo %s para guardar\n", filename);
+		return;
+	}
+
+	for (int i = 0; i < FrameIndex; i++)
+	{
+		file << KeyFrame[i].dogPosX << " "
+			<< KeyFrame[i].dogPosY << " "
+			<< KeyFrame[i].dogPosZ << " "
+			<< KeyFrame[i].rotDog << " "
+			<< KeyFrame[i].tiltDog << " "
+			<< KeyFrame[i].rollDog << " " 
+			<< KeyFrame[i].head << " "
+			<< KeyFrame[i].tail << " "
+			<< KeyFrame[i].FLLeg << " "
+			<< KeyFrame[i].FRLeg << " "
+			<< KeyFrame[i].BLLeg << " "
+			<< KeyFrame[i].BRLeg << std::endl;
+	}
+
+	file.close();
+	printf("Animacion guardada en %s con %d keyframes\n", filename, FrameIndex);
+}
+
+void loadAnimationFromFile(const char* filename)
+{
+	std::ifstream file(filename);
+	if (!file.is_open())
+	{
+		printf("Error: no se pudo abrir el archivo %s para cargar\n", filename);
+		return;
+	}
+
+	FrameIndex = 0;
+	while (FrameIndex < MAX_FRAMES && file >> KeyFrame[FrameIndex].dogPosX
+		>> KeyFrame[FrameIndex].dogPosY
+		>> KeyFrame[FrameIndex].dogPosZ
+		>> KeyFrame[FrameIndex].rotDog
+		>> KeyFrame[FrameIndex].tiltDog
+		>> KeyFrame[FrameIndex].rollDog   
+		>> KeyFrame[FrameIndex].head
+		>> KeyFrame[FrameIndex].tail
+		>> KeyFrame[FrameIndex].FLLeg
+		>> KeyFrame[FrameIndex].FRLeg
+		>> KeyFrame[FrameIndex].BLLeg
+		>> KeyFrame[FrameIndex].BRLeg)
+	{
+		FrameIndex++;
+	}
+
+	file.close();
+	printf("Animacion cargada de %s con %d keyframes\n", filename, FrameIndex);
 }
 
 
@@ -292,6 +358,8 @@ int main()
 		KeyFrame[i].rotDogInc = 0;
 		KeyFrame[i].tiltDog = 0;
 		KeyFrame[i].tiltDogInc = 0;
+		KeyFrame[i].rollDog = 0;       
+		KeyFrame[i].rollDogInc = 0;    
 		KeyFrame[i].head = 0;
 		KeyFrame[i].headInc = 0;
 		KeyFrame[i].tail = 0;
@@ -439,6 +507,7 @@ int main()
 		modelTemp = model = glm::translate(model, glm::vec3(dogPosX, dogPosY, dogPosZ));
 		modelTemp = model = glm::rotate(model, glm::radians(rotDog), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelTemp = model = glm::rotate(model, glm::radians(tiltDog), glm::vec3(1.0f, 0.0f, 0.0f));
+		modelTemp = model = glm::rotate(model, glm::radians(rollDog), glm::vec3(0.0f, 0.0f, 1.0f)); 
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		DogBody.Draw(lightingShader);
 		//Head
@@ -767,6 +836,16 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 
 	}
 
+	if (key == GLFW_KEY_F && action == GLFW_PRESS)
+	{
+		saveAnimationToFile("animacion.txt");
+	}
+
+	if (key == GLFW_KEY_R && action == GLFW_PRESS)
+	{
+		loadAnimationFromFile("animacion.txt");
+	}
+
 
 
 	if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action)
@@ -824,19 +903,29 @@ void Animation() {
 		}
 		else
 		{
-			//Draw animation
-			dogPosX += KeyFrame[playIndex].incX;
-			dogPosY += KeyFrame[playIndex].incY;
-			dogPosZ += KeyFrame[playIndex].incZ;
 
-			rotDog += KeyFrame[playIndex].rotDogInc;
-			tiltDog += KeyFrame[playIndex].tiltDogInc;
-			head += KeyFrame[playIndex].headInc;
-			tail += KeyFrame[playIndex].tailInc;
-			FLLeg += KeyFrame[playIndex].FLLegInc;
-			FRLeg += KeyFrame[playIndex].FRLegInc;
-			BLLeg += KeyFrame[playIndex].BLLegInc;
-			BRLeg += KeyFrame[playIndex].BRLegInc;
+			float t = (float)(i_curr_steps + 1) / (float)i_max_steps;
+			float easedT = t * t * (3.0f - 2.0f * t);
+
+			FRAME curr = KeyFrame[playIndex];
+			FRAME next = KeyFrame[playIndex + 1];
+
+			dogPosX = curr.dogPosX + (next.dogPosX - curr.dogPosX) * easedT;
+			dogPosY = curr.dogPosY + (next.dogPosY - curr.dogPosY) * easedT;
+			dogPosZ = curr.dogPosZ + (next.dogPosZ - curr.dogPosZ) * easedT;
+
+			rotDog  = curr.rotDog  + (next.rotDog  - curr.rotDog)  * easedT;
+			tiltDog = curr.tiltDog + (next.tiltDog - curr.tiltDog) * easedT;
+			rollDog = curr.rollDog + (next.rollDog - curr.rollDog) * easedT;
+
+			head = curr.head + (next.head - curr.head) * easedT;
+			tail = curr.tail + (next.tail - curr.tail) * easedT;
+
+			FLLeg = curr.FLLeg + (next.FLLeg - curr.FLLeg) * easedT;
+			FRLeg = curr.FRLeg + (next.FRLeg - curr.FRLeg) * easedT;
+			BLLeg = curr.BLLeg + (next.BLLeg - curr.BLLeg) * easedT;
+			BRLeg = curr.BRLeg + (next.BRLeg - curr.BRLeg) * easedT;
+
 			i_curr_steps++;
 		}
 
