@@ -1,10 +1,11 @@
-// Práctica 12. Animacion por KeyFrames
+// SkyBox (adicional)
 // Camarena Arevalo Yael Eduardo 
-// Fecha de entrega: 3 de mayo de 2026
+// Fecha de entrega: 5 de mayo de 2026
 // 318279864
 #include <iostream>
 #include <cmath>
 #include <fstream>
+#include <vector>
 
 // GLEW
 #include <GL/glew.h>
@@ -28,6 +29,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Model.h"
+#include "Texture.h"
 
 
 // Function prototypes
@@ -102,6 +104,63 @@ float vertices[] = {
 	   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 };
 
+GLfloat skyboxVertices[] = {
+	// Positions
+	-1.0f,  1.0f, -1.0f,
+	-1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+
+	-1.0f, -1.0f,  1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f,  1.0f,
+	-1.0f, -1.0f,  1.0f,
+
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+
+	-1.0f, -1.0f,  1.0f,
+	-1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f, -1.0f,  1.0f,
+	-1.0f, -1.0f,  1.0f,
+
+	-1.0f,  1.0f, -1.0f,
+	 1.0f,  1.0f, -1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	-1.0f,  1.0f,  1.0f,
+	-1.0f,  1.0f, -1.0f,
+
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f,  1.0f
+};
+
+GLuint indices[] =
+{  // Note that we start from 0!
+	0,1,2,3,
+	4,5,6,7,
+	8,9,10,11,
+	12,13,14,15,
+	16,17,18,19,
+	20,21,22,23,
+	24,25,26,27,
+	28,29,30,31,
+	32,33,34,35
+};
 
 glm::vec3 Light1 = glm::vec3(0);
 //Anim
@@ -131,8 +190,8 @@ typedef struct _frame {
 	float rotDogInc;
 	float tiltDog;
 	float tiltDogInc;
-	float rollDog;       
-	float rollDogInc;   
+	float rollDog;
+	float rollDogInc;
 	float dogPosX;
 	float dogPosY;
 	float dogPosZ;
@@ -172,7 +231,7 @@ void saveFrame(void)
 
 	KeyFrame[FrameIndex].rotDog = rotDog;
 	KeyFrame[FrameIndex].tiltDog = tiltDog;
-	KeyFrame[FrameIndex].rollDog = rollDog; 
+	KeyFrame[FrameIndex].rollDog = rollDog;
 	KeyFrame[FrameIndex].head = head;
 	KeyFrame[FrameIndex].tail = tail;
 	KeyFrame[FrameIndex].FLLeg = FLLeg;
@@ -191,7 +250,7 @@ void resetElements(void)
 
 	rotDog = KeyFrame[0].rotDog;
 	tiltDog = KeyFrame[0].tiltDog;
-	rollDog = KeyFrame[0].rollDog; 
+	rollDog = KeyFrame[0].rollDog;
 	head = KeyFrame[0].head;
 	tail = KeyFrame[0].tail;
 	FLLeg = KeyFrame[0].FLLeg;
@@ -233,7 +292,7 @@ void saveAnimationToFile(const char* filename)
 			<< KeyFrame[i].dogPosZ << " "
 			<< KeyFrame[i].rotDog << " "
 			<< KeyFrame[i].tiltDog << " "
-			<< KeyFrame[i].rollDog << " " 
+			<< KeyFrame[i].rollDog << " "
 			<< KeyFrame[i].head << " "
 			<< KeyFrame[i].tail << " "
 			<< KeyFrame[i].FLLeg << " "
@@ -261,7 +320,7 @@ void loadAnimationFromFile(const char* filename)
 		>> KeyFrame[FrameIndex].dogPosZ
 		>> KeyFrame[FrameIndex].rotDog
 		>> KeyFrame[FrameIndex].tiltDog
-		>> KeyFrame[FrameIndex].rollDog   
+		>> KeyFrame[FrameIndex].rollDog
 		>> KeyFrame[FrameIndex].head
 		>> KeyFrame[FrameIndex].tail
 		>> KeyFrame[FrameIndex].FLLeg
@@ -331,6 +390,7 @@ int main()
 
 	Shader lightingShader("Shader/lighting.vs", "Shader/lighting.frag");
 	Shader lampShader("Shader/lamp.vs", "Shader/lamp.frag");
+	Shader skyboxShader("Shader/SkyBox.vs", "Shader/SkyBox.frag");
 
 
 	//models
@@ -358,8 +418,8 @@ int main()
 		KeyFrame[i].rotDogInc = 0;
 		KeyFrame[i].tiltDog = 0;
 		KeyFrame[i].tiltDogInc = 0;
-		KeyFrame[i].rollDog = 0;       
-		KeyFrame[i].rollDogInc = 0;    
+		KeyFrame[i].rollDog = 0;
+		KeyFrame[i].rollDogInc = 0;
 		KeyFrame[i].head = 0;
 		KeyFrame[i].headInc = 0;
 		KeyFrame[i].tail = 0;
@@ -379,12 +439,14 @@ int main()
 	GLuint VBO, VAO, EBO;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
-
+	glGenBuffers(1, &EBO);
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// Position attribute
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
@@ -398,6 +460,26 @@ int main()
 	glUniform1i(glGetUniformLocation(lightingShader.Program, "Material.difuse"), 0);
 	glUniform1i(glGetUniformLocation(lightingShader.Program, "Material.specular"), 1);
 
+	// Skybox
+	GLuint skyboxVBO, skyboxVAO;
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+
+	// Load textures
+	std::vector<const GLchar*> faces;
+	faces.push_back("Skybox/right.jpg");
+	faces.push_back("Skybox/left.jpg");
+	faces.push_back("Skybox/top.jpg");
+	faces.push_back("Skybox/bottom.jpg");
+	faces.push_back("Skybox/back.jpg");
+	faces.push_back("Skybox/front.jpg");
+
+	GLuint cubemapTexture = TextureLoading::LoadCubemap(faces);
 
 	glm::mat4 projection = glm::perspective(camera.GetZoom(), (GLfloat)SCREEN_WIDTH / (GLfloat)SCREEN_HEIGHT, 0.1f, 100.0f);
 
@@ -507,7 +589,7 @@ int main()
 		modelTemp = model = glm::translate(model, glm::vec3(dogPosX, dogPosY, dogPosZ));
 		modelTemp = model = glm::rotate(model, glm::radians(rotDog), glm::vec3(0.0f, 1.0f, 0.0f));
 		modelTemp = model = glm::rotate(model, glm::radians(tiltDog), glm::vec3(1.0f, 0.0f, 0.0f));
-		modelTemp = model = glm::rotate(model, glm::radians(rollDog), glm::vec3(0.0f, 0.0f, 1.0f)); 
+		modelTemp = model = glm::rotate(model, glm::radians(rollDog), glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		DogBody.Draw(lightingShader);
 		//Head
@@ -585,15 +667,34 @@ int main()
 
 		glBindVertexArray(0);
 
+		// Draw SkyBox
+		glDepthFunc(GL_LEQUAL); // Cambia la función de profundidad para que el skybox se dibuje detrás
+		skyboxShader.Use();
+
+		view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // Remueve la traslación de la matriz de vista
+		glUniformMatrix4fv(glGetUniformLocation(skyboxShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(skyboxShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+		glBindVertexArray(skyboxVAO);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+
+		glDepthFunc(GL_LESS);
 
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
 	}
 
 
-
-
 	// Terminate GLFW, clearing any resources allocated by GLFW.
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+	glDeleteVertexArrays(1, &skyboxVAO);
+	glDeleteBuffers(1, &skyboxVBO);
+
 	glfwTerminate();
 
 
@@ -914,7 +1015,7 @@ void Animation() {
 			dogPosY = curr.dogPosY + (next.dogPosY - curr.dogPosY) * easedT;
 			dogPosZ = curr.dogPosZ + (next.dogPosZ - curr.dogPosZ) * easedT;
 
-			rotDog  = curr.rotDog  + (next.rotDog  - curr.rotDog)  * easedT;
+			rotDog = curr.rotDog + (next.rotDog - curr.rotDog) * easedT;
 			tiltDog = curr.tiltDog + (next.tiltDog - curr.tiltDog) * easedT;
 			rollDog = curr.rollDog + (next.rollDog - curr.rollDog) * easedT;
 
